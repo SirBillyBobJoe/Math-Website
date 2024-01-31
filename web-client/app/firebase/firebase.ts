@@ -9,7 +9,7 @@ import { getFunctions } from "firebase/functions";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyCW-jFR5QoZeJIthEoRc3DTWp2fiX8szGU",
+    apiKey: "AIzaSyDWoVZ2nMQiXGUl3VbO8ISvnai9ZMOwVK0",
     authDomain: "mathwebsite-74c12.firebaseapp.com",
     projectId: "mathwebsite-74c12",
     storageBucket: "mathwebsite-74c12.appspot.com",
@@ -54,10 +54,20 @@ export function signOut() {
     return auth.signOut();
 }
 
+
+
 /**
  * Trigger a callback when user auth state changes.
  * @returns A function to unsubscribe callback.
  */
-export function onAuthStateChangedHelper(callback: (user: User | null) => void) {
-    return onAuthStateChanged(auth, callback);
+export function onAuthStateChangedHelper(callback: (uid: string | null) => void) {
+    return onAuthStateChanged(auth, (user) => {
+        if (user) {
+
+            callback(user.uid);
+        } else {
+
+            callback(null);
+        }
+    });
 }

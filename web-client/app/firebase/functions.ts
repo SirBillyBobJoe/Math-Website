@@ -2,7 +2,19 @@ import { httpsCallable } from 'firebase/functions'
 import { functions } from './firebase';
 
 const setUserNameFunction = httpsCallable(functions, 'setUserName');
+const getCollectionDataFunction = httpsCallable(functions, 'getCollectionData');
+const updateUserFunction= httpsCallable(functions, 'updateUser');
+
 
 export async function setUserName(username: String, uid: string) {
-    setUserNameFunction({ username, uid });
+    await setUserNameFunction({ username, uid });
+}
+
+export async function getCollectionData(collection: string, id: string) {
+    const response= await getCollectionDataFunction({id,collection})
+    return response.data
+}
+
+export async function updateUser(updates: Record<string, any>, uid: string) {
+    await updateUserFunction({ uid, updates });
 }

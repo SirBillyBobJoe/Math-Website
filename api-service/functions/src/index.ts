@@ -14,7 +14,7 @@ export const createUser = functions.auth.user().onCreate((user) => {
         email: user.email,
         currentLevel: 0,
         currentModule: 1,
-        currentTopic: 101,
+        currentTopic: 0,
         Achievements: [],
     };
 
@@ -54,4 +54,22 @@ export const getCollectionData = onCall({maxInstances: 1}, async (request) => {
   
     return info;
   });
+
+  export const updateUser = onCall({ maxInstances: 1 }, async (request) => {
+    const { uid, updates } = request.data;
+
+    if (!uid || typeof updates !== 'object') {
+        throw new Error("Invalid request: UID and updates object are required.");
+    }
+
+    try {
+        await firestore.collection("users").doc(uid).update(updates);
+        logger.info(`User Updated: UID=${uid}, Updates=${JSON.stringify(updates)}`);
+        return { message: "User updated successfully." };
+    } catch (error) {
+        logger.error(`Error updating user: UID=${uid}`, error);
+        throw new Error(`Error updating user: ${error}`);
+    }
+});
+
 
