@@ -1,5 +1,15 @@
 .signOut{
     cursor: pointer;
+    font-weight: 800;
+    border: solid black 1px;
+    padding: 10px;
+    border-radius: 20px;
+    background-color: burlywood;
+    transition:ease all 0.5s
+}
+
+.signOut:hover{
+    transform: scale(1.05);
 }
 
 .container{

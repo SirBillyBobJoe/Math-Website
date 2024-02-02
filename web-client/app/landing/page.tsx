@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { onAuthStateChangedHelper, signOut } from "../firebase/firebase";
 import { getCollectionData, updateUser } from "../firebase/functions";
 import styles from "./page.module.css";
-import { equationMap,EquationFunction } from "../formulas/basicFacts"
+import { equationMap, EquationFunction } from "../formulas/basicFacts"
 import { UserInfo } from "../schema/userInfo"
 import { Formula } from "../schema/formula"
 import { Topic } from "../schema/topic"
@@ -19,11 +19,13 @@ export default function Landing() {
     const [topic, setTopic] = useState<Topic>();
     const [formula, setFormula] = useState<Formula>();
     const [equation, setEquation] = useState<EquationFunction>();
+    const [isLoading, setIsLoading] = useState<boolean>(false)
     const [minConstraints, setMinConstraints] = useState(0);
     const [maxConstraints, setMaxConstraints] = useState(0);
 
     useEffect(() => {
         const updateLevelQuestion = async () => {
+            setIsLoading(true)
             if (user) {
                 await updateUser(
                     {
@@ -35,10 +37,12 @@ export default function Landing() {
                 setUser(tempUser)
 
             }
+            setIsLoading(false)
 
         }
 
         const updateTopicQuestion = async () => {
+            setIsLoading(true)
             if (user) {
                 await updateUser(
                     {
@@ -51,6 +55,7 @@ export default function Landing() {
                 setUser(tempUser)
 
             }
+            setIsLoading(false)
         }
         if (formula) {
             const tempEquation = equationMap[formula.formulaName]
@@ -60,11 +65,11 @@ export default function Landing() {
                 setQuestion(newQuestion)
             }
         }
-        if (correct == 2) {
+        if (correct == 10) {
             if (user && topic && user.currentLevel >= topic.maxLevel) {
                 updateTopicQuestion()
 
-            }else{
+            } else {
                 updateLevelQuestion()
             }
 
@@ -90,6 +95,7 @@ export default function Landing() {
 
     useEffect(() => {
         const fetchData = async () => {
+            setIsLoading(true)
             if (user) {
                 const tempModule = await getCollectionData("modules", `${user?.currentModule}`) as Module
                 setModule(tempModule)
@@ -121,7 +127,7 @@ export default function Landing() {
                     }
                 }
             }
-
+            setIsLoading(false)
         }
         fetchData()
     }, [user]);
@@ -134,17 +140,6 @@ export default function Landing() {
 
 
 
-    /*
-    const handleButton = async () => {
-        console.log(await updateUser(
-            {
-                currentModule: 1,
-                currentTopic: 101,
-            },
-            "RvmKszcueBf7YpW8Xtb8vDNC9Rf2"
-        ))
-    }
-    */
 
     const onSubmitAnswer = (event: any) => {
         event.preventDefault()
@@ -165,18 +160,29 @@ export default function Landing() {
     }
 
     return (
-        <div className={styles.container}>
-            <p className={styles.signOut} onClick={onSignOut}>SignOut</p>
+        <>
+            {isLoading ?
+                (
+                    <div className={styles.container}>
+                        <img src="loading.gif" alt="loading" />
+                        <div>Uploading...</div>
+                    </div>
+                ) : (
+                    <div className={styles.container}>
+                        <p className={styles.signOut} onClick={onSignOut}>SignOut</p>
 
-            <div className={styles.question}>
-                <span>{`${correct}/10`}</span>
-                {question.question}
-            </div>
+                        <div className={styles.question}>
+                            <span>{`${correct}/10`}</span>
+                            {question.question}
+                        </div>
 
-            <form onSubmit={onSubmitAnswer}>
-                <input type="text" value={answerInput} onChange={onChangeAnswerInput} />
-                <button type="submit" >submit</button>
-            </form>
-        </div>
+                        <form onSubmit={onSubmitAnswer}>
+                            <input type="text" value={answerInput} onChange={onChangeAnswerInput} />
+                            <button type="submit" >submit</button>
+                        </form>
+                    </div>
+                )
+            }
+        </>
     )
 }
