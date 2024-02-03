@@ -3,4 +3,5 @@ export interface Topic {
     maxLevel:number,
     name:string,
     topicID:number,
+    numQuestion:number
 }

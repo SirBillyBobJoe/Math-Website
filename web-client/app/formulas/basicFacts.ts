@@ -1,73 +1,145 @@
-import { randomInt } from "crypto"
+import { Question } from "../schema/question";
+const getRandomInt = (min: number, max: number) => {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+};
 
-export const createAdditionQuestion = (minConstraints: number, maxConstraints: number) => {
-    const getRandomInt = (min: number, max: number) => {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    };
-    const num1 = getRandomInt(minConstraints, maxConstraints);
-    const num2 = getRandomInt(minConstraints, maxConstraints);
-    const ans = num1 + num2;
-    const question=`What is ${num1}+${num2}=...?`
-    
-    return { question, ans }
-}
+export const createAdditionQuestion = (infoArray: string[]) => {
+    let questions: Question[] = [];
+    if (!infoArray) return { questions }
+    console.log(infoArray)
+    console.log(infoArray[1])
+    const isOrdered = infoArray[0] == ("O")
+    const start1 = parseInt(infoArray[1], 10);
+    const end1 = parseInt(infoArray[2], 10);
+    const start2 = parseInt(infoArray[3], 10);
+    const end2 = parseInt(infoArray[4], 10);
 
-
-export const createSubtractionQuestion = (minConstraints: number, maxConstraints: number) => {
-    const getRandomInt = (min: number, max: number) => {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    };
-    const num1 = getRandomInt(minConstraints, maxConstraints);
-    let num2 = getRandomInt(minConstraints, maxConstraints);
-    while(num2>num1){
-        num2=getRandomInt(minConstraints, maxConstraints);
+    if (isOrdered) {
+        for (let i = start2; i <= end2; i++) {
+            const num1 = start1;
+            const num2 = i;
+            const ans = (num1 + num2).toString();
+            const question = `What is ${num1}+${num2}=...?`
+            questions.push({ question, ans })
+        }
+    } else {
+        for (let i = 0; i < 10; i++) {
+            const num1 = getRandomInt(start1, end1)
+            const num2 = getRandomInt(start2, end2)
+            const ans = (num1 + num2).toString();
+            const question = `What is ${num1}+${num2}=...?`
+            questions.push({ question, ans })
+        }
     }
-    const ans = num1 - num2;
-    const question=`What is ${num1}-${num2}=...?`
-    
-    return { question, ans }
+    console.log(questions)
+    return { questions }
 }
 
-export const createMultiplicationQuestion = (minConstraints: number, maxConstraints: number) => {
-    const getRandomInt = (min: number, max: number) => {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    };
-    const num1 = getRandomInt(minConstraints, maxConstraints);
-    let num2=0;
-    if(minConstraints<=12)num2 = getRandomInt(1, 12);
-    else num2=getRandomInt(10, 99);
+export const createSubtractionQuestion = (infoArray: string[]) => {
+    let questions: Question[] = [];
+    if (!infoArray) return { questions }
+    console.log(infoArray)
+    console.log(infoArray[1])
+    const isOrdered = infoArray[0] == ("O")
+    const start1 = parseInt(infoArray[1], 10);
+    const end1 = parseInt(infoArray[2], 10);
+    const start2 = parseInt(infoArray[3], 10);
+    const end2 = parseInt(infoArray[4], 10);
 
-    const ans = num1 * num2;
-    const question=`What is ${num1} x ${num2}=...?`
-    
-    return { question, ans }
+    if (isOrdered) {
+        for (let i = start2; i <= end2; i++) {
+            const num1 = start1;
+            const num2 = i;
+            const ans = (num2 - num1).toString();
+            const question = `What is ${num2}-${num1}=...?`
+            questions.push({ question, ans })
+        }
+    } else {
+        for (let i = 0; i < 10; i++) {
+            const num1 = getRandomInt(start1, end1)
+            let num2 = getRandomInt(start2, end2)
+            while (num2 < num1){
+                num2 = getRandomInt(start2, end2)
+            }
+            const ans = (num2 - num1).toString();
+            const question = `What is ${num2}-${num1}=...?`
+            questions.push({ question, ans })
+        }
+    }
+    console.log(questions)
+    return { questions }
 }
 
-export const createDivisionQuestion = (minConstraints: number, maxConstraints: number) => {
-    const getRandomInt = (min: number, max: number) => {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    };
-    const num1 = getRandomInt(minConstraints, maxConstraints);
-    let ans=0;
-    if(minConstraints<=12)ans = getRandomInt(1, 12);
-    else ans=getRandomInt(10, 99);
+export const createMultiplicationQuestion = (infoArray: string[]) => {
+    let questions: Question[] = [];
+    if (!infoArray) return { questions }
+    console.log(infoArray)
+    console.log(infoArray[1])
+    const isOrdered = infoArray[0] == ("O")
+    const start1 = parseInt(infoArray[1], 10);
+    const end1 = parseInt(infoArray[2], 10);
+    const start2 = parseInt(infoArray[3], 10);
+    const end2 = parseInt(infoArray[4], 10);
 
-    const num2 = num1 * ans;
-    const question=`What is ${num2} / ${num1}=...?`
-    
-    return { question, ans }
+    if (isOrdered) {
+        for (let i = start2; i <= end2; i++) {
+            const num1 = start1;
+            const num2 = i;
+            const ans = (num1 * num2).toString();
+            const question = `What is ${num1}x${num2}=...?`
+            questions.push({ question, ans })
+        }
+    } else {
+        for (let i = 1; i <= 10; i++) {
+            const num1 = getRandomInt(start1, end1)
+            const num2 = getRandomInt(start2, end2)
+            const ans = (num1 * num2).toString();
+            const question = `What is ${num1}x${num2}=...?`
+            questions.push({ question, ans })
+        }
+    }
+    console.log(questions)
+    return { questions }
+}
+
+export const createDivisionQuestion = (infoArray: string[]) => {
+    let questions: Question[] = [];
+    if (!infoArray) return { questions }
+    console.log(infoArray)
+    console.log(infoArray[1])
+    const isOrdered = infoArray[0] == ("O")
+    const start1 = parseInt(infoArray[1], 10);
+    const end1 = parseInt(infoArray[2], 10);
+    const start2 = parseInt(infoArray[3], 10);
+    const end2 = parseInt(infoArray[4], 10);
+
+    if (isOrdered) {
+        for (let i = start2; i <= end2; i++) {
+            const num2 = start1;
+            const ans = i.toString()
+            const num1 = num2*i;
+            const question = `What is ${num1}/${num2}=...?`
+            questions.push({ question, ans })
+        }
+    } else {
+        for (let i = 1; i <=10; i++) {
+            const num2 =  getRandomInt(start1, end1)
+            const temp = getRandomInt(start2, end2)
+            const num1 = num2*temp
+            const ans=temp.toString()
+            const question = `What is ${num1}/${num2}=...?`
+            questions.push({ question, ans })
+        }
+    }
+    console.log(questions)
+    return { questions }
 }
 
 
-export type EquationFunction = (minConstraints: number, maxConstraints: number) => { question: string; ans: number };
+export type EquationFunction = (infoArray: string[]) => { questions: Question[] };
+
 
 export const equationMap: { [key: string]: EquationFunction } = {
     "addition": createAdditionQuestion,

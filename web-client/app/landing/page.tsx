@@ -9,22 +9,25 @@ import { UserInfo } from "../schema/userInfo"
 import { Formula } from "../schema/formula"
 import { Topic } from "../schema/topic"
 import { Module } from "../schema/module"
+import { Question } from "../schema/question";
 
 export default function Landing() {
-    const [question, setQuestion] = useState({ question: "", ans: 0 });
+    const [questions, setQuestions] = useState<Question[]>([]);
+    const [questionIndex, setQuestionIndex] = useState<number>(0);
     const [correct, setCorrect] = useState(0);
     const [answerInput, setAnswerInput] = useState("");
     const [user, setUser] = useState<UserInfo>();
     const [module, setModule] = useState<Module>();
     const [topic, setTopic] = useState<Topic>();
     const [formula, setFormula] = useState<Formula>();
+    const [infoArray, setInfoArray] = useState<string[]>([]);
     const [equation, setEquation] = useState<EquationFunction>();
     const [isLoading, setIsLoading] = useState<boolean>(false)
-    const [minConstraints, setMinConstraints] = useState(0);
-    const [maxConstraints, setMaxConstraints] = useState(0);
+
 
     useEffect(() => {
         const updateLevelQuestion = async () => {
+
             setIsLoading(true)
             if (user) {
                 await updateUser(
@@ -43,6 +46,7 @@ export default function Landing() {
 
         const updateTopicQuestion = async () => {
             setIsLoading(true)
+
             if (user) {
                 await updateUser(
                     {
@@ -57,22 +61,14 @@ export default function Landing() {
             }
             setIsLoading(false)
         }
-        if (formula) {
-            const tempEquation = equationMap[formula.formulaName]
-            setEquation(tempEquation)
-            if (tempEquation) {
-                const newQuestion = tempEquation(minConstraints, maxConstraints);
-                setQuestion(newQuestion)
-            }
-        }
+
         if (correct == 10) {
             if (user && topic && user.currentLevel >= topic.maxLevel) {
                 updateTopicQuestion()
-
             } else {
                 updateLevelQuestion()
             }
-
+            setQuestionIndex(0)
             setCorrect(0)
 
 
@@ -112,16 +108,19 @@ export default function Landing() {
                         console.log(tempFormula)
 
                         if (tempFormula) {
-                            const tempMaxConstraints = tempFormula?.maxConstraints[user?.currentLevel]
-                            const tempMinConstraints = tempFormula?.minConstraints[user?.currentLevel]
-                            setMaxConstraints(tempMaxConstraints)
-                            setMinConstraints(tempMinConstraints)
-
+                            const variables = tempFormula?.variables;
+                            const start = user.currentLevel * (variables * 2+1)
+                            const end = start + (variables * 2+1);
+                            console.log(tempFormula?.numbers)
+                            const tempInfoArray = tempFormula?.numbers.slice(start, end)
+                            setInfoArray(tempInfoArray)
                             const tempEquation = equationMap[tempFormula.formulaName]
+
                             setEquation(tempEquation)
-                            if (tempEquation) {
-                                const newQuestion = tempEquation(tempMinConstraints, tempMaxConstraints);
-                                setQuestion(newQuestion)
+
+                            if (tempEquation && tempInfoArray&&tempInfoArray.length!=0) {
+                                const { questions } = tempEquation(tempInfoArray);
+                                setQuestions(questions)
                             }
                         }
                     }
@@ -143,11 +142,13 @@ export default function Landing() {
 
     const onSubmitAnswer = (event: any) => {
         event.preventDefault()
-        const isCorrect = answerInput == `${question.ans}`
+        const isCorrect = answerInput == questions[questionIndex].ans
 
         if (isCorrect) {
             const temp = correct;
             setCorrect(temp + 1);
+            const tempQuestionIndex = questionIndex + 1;
+            setQuestionIndex(tempQuestionIndex)
         } else {
 
         }
@@ -165,7 +166,7 @@ export default function Landing() {
                 (
                     <div className={styles.container}>
                         <img src="loading.gif" alt="loading" />
-                        <div>Uploading...</div>
+                        <div>Loading...</div>
                     </div>
                 ) : (
                     <div className={styles.container}>
@@ -173,7 +174,7 @@ export default function Landing() {
 
                         <div className={styles.question}>
                             <span>{`${correct}/10`}</span>
-                            {question.question}
+                            {questions[questionIndex] && questions[questionIndex].question}
                         </div>
 
                         <form onSubmit={onSubmitAnswer}>
