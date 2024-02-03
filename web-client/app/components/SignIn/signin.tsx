@@ -1,7 +1,7 @@
 'use client'
 import { useState } from "react";
 import styles from "./signin.module.css";
-import { signInWithEmail } from "../firebase/firebase";
+import { signInWithEmail } from "../../firebase/firebase";
 import Link from "next/link";
 
 export default function SignIn() {

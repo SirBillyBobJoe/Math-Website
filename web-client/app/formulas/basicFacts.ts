@@ -25,12 +25,17 @@ export const createAdditionQuestion = (infoArray: string[]) => {
             questions.push({ question, ans })
         }
     } else {
+        let prev=-1;
         for (let i = 0; i < 10; i++) {
             const num1 = getRandomInt(start1, end1)
-            const num2 = getRandomInt(start2, end2)
+            let num2 = getRandomInt(start2, end2)
+            while(num2==prev){
+                num2 = getRandomInt(start2, end2)
+            }
             const ans = (num1 + num2).toString();
             const question = `What is ${num1}+${num2}=...?`
             questions.push({ question, ans })
+            prev=num2;
         }
     }
     console.log(questions)
@@ -57,15 +62,17 @@ export const createSubtractionQuestion = (infoArray: string[]) => {
             questions.push({ question, ans })
         }
     } else {
+        let prev=-1;
         for (let i = 0; i < 10; i++) {
             const num1 = getRandomInt(start1, end1)
             let num2 = getRandomInt(start2, end2)
-            while (num2 < num1){
+            while (num2 < num1||prev==num2){
                 num2 = getRandomInt(start2, end2)
             }
             const ans = (num2 - num1).toString();
             const question = `What is ${num2}-${num1}=...?`
             questions.push({ question, ans })
+            prev=num2;
         }
     }
     console.log(questions)
@@ -92,12 +99,17 @@ export const createMultiplicationQuestion = (infoArray: string[]) => {
             questions.push({ question, ans })
         }
     } else {
+        let prev=-1;
         for (let i = 1; i <= 10; i++) {
             const num1 = getRandomInt(start1, end1)
-            const num2 = getRandomInt(start2, end2)
+            let num2 = getRandomInt(start2, end2)
+            while(prev==num2){
+                num2 = getRandomInt(start2, end2)
+            }
             const ans = (num1 * num2).toString();
             const question = `What is ${num1}x${num2}=...?`
             questions.push({ question, ans })
+            prev=num2;
         }
     }
     console.log(questions)
@@ -124,14 +136,20 @@ export const createDivisionQuestion = (infoArray: string[]) => {
             questions.push({ question, ans })
         }
     } else {
+        let prev=-1;
         for (let i = 1; i <=10; i++) {
             const num2 =  getRandomInt(start1, end1)
-            const temp = getRandomInt(start2, end2)
+            let temp = getRandomInt(start2, end2)
+            while(prev==temp){
+                temp = getRandomInt(start2, end2)
+            }
             const num1 = num2*temp
             const ans=temp.toString()
             const question = `What is ${num1}/${num2}=...?`
             questions.push({ question, ans })
+            prev=temp;
         }
+        
     }
     console.log(questions)
     return { questions }

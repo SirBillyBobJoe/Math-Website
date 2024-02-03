@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { onAuthStateChangedHelper, signOut } from "../firebase/firebase";
 import { getCollectionData, updateUser } from "../firebase/functions";
 import styles from "./page.module.css";
@@ -10,6 +10,8 @@ import { Formula } from "../schema/formula"
 import { Topic } from "../schema/topic"
 import { Module } from "../schema/module"
 import { Question } from "../schema/question";
+import { useRouter } from 'next/navigation';
+import { formatTime } from "../generalFunctions/timerFunction";
 
 export default function Landing() {
     const [questions, setQuestions] = useState<Question[]>([]);
@@ -22,56 +24,19 @@ export default function Landing() {
     const [formula, setFormula] = useState<Formula>();
     const [infoArray, setInfoArray] = useState<string[]>([]);
     const [equation, setEquation] = useState<EquationFunction>();
-    const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [isLoading, setIsLoading] = useState<boolean>(true)
+    const [elapsedTime, setElapsedTime] = useState<number>(0);
+    const [timer, setTimer] = useState<NodeJS.Timeout | number | null>(null);
+    const router = useRouter();
+    const inputRef = useRef<any>(null)
 
 
     useEffect(() => {
-        const updateLevelQuestion = async () => {
-
-            setIsLoading(true)
-            if (user) {
-                await updateUser(
-                    {
-                        currentLevel: user.currentLevel + 1,
-                    },
-                    `${user?.uid}`
-                )
-                const tempUser = await getCollectionData("users", user.uid) as UserInfo
-                setUser(tempUser)
-
-            }
-            setIsLoading(false)
-
-        }
-
-        const updateTopicQuestion = async () => {
-            setIsLoading(true)
-
-            if (user) {
-                await updateUser(
-                    {
-                        currentLevel: 0,
-                        currentTopic: user.currentTopic + 1
-                    },
-                    `${user?.uid}`
-                )
-                const tempUser = await getCollectionData("users", user.uid) as UserInfo
-                setUser(tempUser)
-
-            }
-            setIsLoading(false)
-        }
-
-        if (correct == 10) {
-            if (user && topic && user.currentLevel >= topic.maxLevel) {
-                updateTopicQuestion()
-            } else {
-                updateLevelQuestion()
-            }
+        if (questionIndex == 10) {
+            stopTimer();
+            router.push(`/results?correct=${correct}&uid=${user?.uid}&maxTopicLevel=${topic?.maxLevel}&time=${elapsedTime}`);
             setQuestionIndex(0)
             setCorrect(0)
-
-
         }
     }, [correct]);
 
@@ -90,8 +55,8 @@ export default function Landing() {
     }, []);
 
     useEffect(() => {
+        setIsLoading(true)
         const fetchData = async () => {
-            setIsLoading(true)
             if (user) {
                 const tempModule = await getCollectionData("modules", `${user?.currentModule}`) as Module
                 setModule(tempModule)
@@ -109,8 +74,8 @@ export default function Landing() {
 
                         if (tempFormula) {
                             const variables = tempFormula?.variables;
-                            const start = user.currentLevel * (variables * 2+1)
-                            const end = start + (variables * 2+1);
+                            const start = user.currentLevel * (variables * 2 + 1)
+                            const end = start + (variables * 2 + 1);
                             console.log(tempFormula?.numbers)
                             const tempInfoArray = tempFormula?.numbers.slice(start, end)
                             setInfoArray(tempInfoArray)
@@ -118,25 +83,50 @@ export default function Landing() {
 
                             setEquation(tempEquation)
 
-                            if (tempEquation && tempInfoArray&&tempInfoArray.length!=0) {
+                            if (tempEquation && tempInfoArray && tempInfoArray.length != 0) {
                                 const { questions } = tempEquation(tempInfoArray);
                                 setQuestions(questions)
+                                if (questions.length != 0) {
+                                    setIsLoading(false)
+                                    startTimer()
+                                }
                             }
                         }
                     }
                 }
             }
-            setIsLoading(false)
         }
         fetchData()
+
     }, [user]);
 
+    useEffect(() => {
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [isLoading])
 
     const onSignOut = () => {
         window.location.href = "/";
         signOut()
     }
 
+    const startTimer = () => {
+        if (timer === null) {
+            const startTime = Date.now() - elapsedTime;
+            const newTimer = setInterval(() => {
+                setElapsedTime(Date.now() - startTime);
+            }, 1000);
+            setTimer(newTimer);
+        }
+    };
+
+    const stopTimer = () => {
+        if (timer !== null) {
+            clearInterval(timer as NodeJS.Timeout);
+            setTimer(null);
+        }
+    };
 
 
 
@@ -150,7 +140,8 @@ export default function Landing() {
             const tempQuestionIndex = questionIndex + 1;
             setQuestionIndex(tempQuestionIndex)
         } else {
-
+            const tempQuestionIndex = questionIndex + 1;
+            setQuestionIndex(tempQuestionIndex)
         }
         setAnswerInput("")
         console.log(user)
@@ -159,6 +150,8 @@ export default function Landing() {
     const onChangeAnswerInput = (event: any) => {
         setAnswerInput(event.target.value)
     }
+
+
 
     return (
         <>
@@ -173,12 +166,13 @@ export default function Landing() {
                         <p className={styles.signOut} onClick={onSignOut}>SignOut</p>
 
                         <div className={styles.question}>
-                            <span>{`${correct}/10`}</span>
+                            <span>Elapsed Time: {formatTime(elapsedTime)}</span>
+                            <span>{`Score: ${correct}/10`}</span>
                             {questions[questionIndex] && questions[questionIndex].question}
                         </div>
 
                         <form onSubmit={onSubmitAnswer}>
-                            <input type="text" value={answerInput} onChange={onChangeAnswerInput} />
+                            <input ref={inputRef} type="text" value={answerInput} onChange={onChangeAnswerInput} />
                             <button type="submit" >submit</button>
                         </form>
                     </div>
