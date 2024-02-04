@@ -8,13 +8,7 @@ import { getFunctions } from "firebase/functions";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyDWoVZ2nMQiXGUl3VbO8ISvnai9ZMOwVK0",
-    authDomain: "mathwebsite-74c12.firebaseapp.com",
-    projectId: "mathwebsite-74c12",
-    storageBucket: "mathwebsite-74c12.appspot.com",
-    messagingSenderId: "178356743416",
-    appId: "1:178356743416:web:ef113477131d56fbe31f0d",
-    measurementId: "G-DZLVHHXCV1"
+
 };
 
 const app = initializeApp(firebaseConfig);
