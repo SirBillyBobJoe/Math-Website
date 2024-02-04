@@ -2,11 +2,10 @@
 import { useSearchParams, useRouter } from 'next/navigation'
 import styles from "./page.module.css";
 import { UserInfo } from '../schema/userInfo';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { getCollectionData, updateUser } from '../firebase/functions';
 import { formatTime } from '../generalFunctions/timerFunction';
-
-export default function results() {
+function Search() {
     const router = useRouter();
     const correct = useSearchParams().get('correct');
     const uid = useSearchParams().get('uid');
@@ -17,7 +16,7 @@ export default function results() {
     if (timeString) {
         time = parseInt(timeString, 10);
     }
-    
+
     let maxTopicLevel = 1;
     if (maxTopicLevelString) {
         maxTopicLevel = parseInt(maxTopicLevelString, 10);
@@ -36,7 +35,7 @@ export default function results() {
         getUsers();
 
         setIsLoading(false)
- 
+
     }, [])
 
     const onClickRetry = () => {
@@ -66,28 +65,33 @@ export default function results() {
         }
         setIsLoading(false)
     }
+    return (<>{
+        isLoading ?
+            (
+                <div className={styles.container}>
+                    <img src="loading.gif" alt="loading" />
+                    <div>Loading...</div>
+                </div>
+            ) : (
+                <div className={styles.container}>
+                    {`You Got ${correct}/10 Correct!`}
+                    <br />
+                    {`And Finished in ${formatTime(time)}!`}
+                    <div>
+                        <button onClick={onClickRetry} className={styles.button}>Retry</button>
+                        <button onClick={onClickNext} className={styles.button}>Next Level</button>
+                    </div>
+                </div>
+            )
+    }
+    </>)
+}
+export default function results() {
+
 
     return (
-        <>
-            {
-                isLoading ?
-                    (
-                        <div className={styles.container}>
-                            <img src="loading.gif" alt="loading" />
-                            <div>Loading...</div>
-                        </div>
-                    ) : (
-                        <div className={styles.container}>
-                            {`You Got ${correct}/10 Correct!`}
-                            <br/>
-                            {`And Finished in ${formatTime(time)}!`}
-                            <div>
-                                <button onClick={onClickRetry} className={styles.button}>Retry</button>
-                                <button onClick={onClickNext} className={styles.button}>Next Level</button>
-                            </div>
-                        </div>
-                    )
-            }
-        </>
+        <Suspense>
+            <Search />
+        </Suspense>
     )
 }

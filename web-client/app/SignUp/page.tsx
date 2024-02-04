@@ -1,9 +1,9 @@
 'use client'
 import { useState } from "react";
 import styles from "./page.module.css";
-import { createUser, signInWithEmail } from "../../firebase/firebase";
+import { createUser, signInWithEmail } from "../firebase/firebase";
 import Link from "next/link";
-import { setUserName } from "../../firebase/functions";
+import { setUserName } from "../firebase/functions";
 
 
 export default function SignUp() {
@@ -15,7 +15,7 @@ export default function SignUp() {
 
     const onSubmit = (event: any) => {
         event.preventDefault()
-        createUser(email, password, username, (uid: string) => {
+        createUser(email, password, (uid: string) => {
             setErrorMessage("Signed Up Successfully");
             setSuccess(true);
             setUserName(username, uid)

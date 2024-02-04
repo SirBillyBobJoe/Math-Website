@@ -1,7 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getAuth, onAuthStateChanged, User, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, fetchSignInMethodsForEmail, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { getFunctions } from "firebase/functions";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -22,7 +21,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 export const functions = getFunctions();
-export function createUser(email: string, password: string, displayName: string, Success: any, onError: any) {
+
+export function createUser(email: string, password: string, Success: any, onError: any) {
     createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             console.log("Profile updated successfully!");
@@ -47,6 +47,24 @@ export function signInWithEmail(email: string, password: string, onError: any, o
             console.log(error.code);
             onError(error.message);
         });
+}
+
+/**
+ * 
+ * @param providerName - type of sign in we do either google, facebook or github
+ * @returns a promise that resolves with the user's credentials.
+ */
+export function signInWithProvider(providerName: string) {
+    let provider
+
+    switch (providerName) {
+        case 'Google':
+            provider = new GoogleAuthProvider();
+            break;
+        default:
+            throw new Error(`Unsupported provider: ${providerName}`);
+    }
+    return signInWithPopup(auth, provider);
 }
 
 export function signOut() {

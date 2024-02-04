@@ -38,7 +38,7 @@ export default function Landing() {
             setQuestionIndex(0)
             setCorrect(0)
         }
-    }, [correct]);
+    }, [questionIndex]);
 
 
 
